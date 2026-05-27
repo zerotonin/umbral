@@ -1,0 +1,9 @@
+column,type,required,description
+round,int,yes,Game session number this programme is for
+faction,str,yes,Acting faction key (see data/factions.csv)
+target,str,yes,Target constituency name (see data/people_table.csv)
+lever,str,yes,One of concession | repression | agitation
+intent,str,yes,What you want to achieve
+leverage,str,yes,Why you can pull it off (cite history)
+cost,str,no,What it will definitely cost you
+risk_staked,str,no,What you put at risk

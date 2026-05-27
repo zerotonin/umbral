@@ -1,0 +1,5 @@
+column,type,required,description
+round,int,yes,Session number
+faction,str,yes,Acting faction key
+target,str,yes,Target constituency
+q_score,int,yes,GM quality score 0-10 (see data/gm_decision_table.csv)
