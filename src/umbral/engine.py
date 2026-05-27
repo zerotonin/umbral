@@ -41,6 +41,7 @@ def run_round(state_path, programmes_path, grades_path, outdir, seed=None) -> di
     outdir = Path(outdir)
     ledger = diary_mod.Diary(outdir / "diary.jsonl")
 
+    before = reports.snapshot(people)
     resolutions = []
     any_martyr = False
     for p in programmes:
@@ -58,7 +59,7 @@ def run_round(state_path, programmes_path, grades_path, outdir, seed=None) -> di
     ledger.log_tipping(round_number, tipped, idx)
 
     reports.save_text(
-        reports.gm_round_report(round_number, resolutions, people, links),
+        reports.gm_round_report(round_number, resolutions, people, before, links),
         outdir / "gm_report.md",
     )
     reports.save_text(

@@ -38,8 +38,107 @@ def _fmt_support(support: dict[str, float]) -> str:
     return ", ".join(f"{f} {round(v)}%" for f, v in items if round(v) > 0)
 
 
-def gm_round_report(round_number, resolutions, constituencies, contagion=None) -> str:
-    lines = [f"# GM Round Report — Session {round_number}", "", "## Programme resolutions"]
+# ── change colouring (teal up / orange down; see constants) ───────────────
+def _span(text: str, color: str) -> str:
+    return f'<span style="color:{color}">{text}</span>'
+
+
+def _delta(after: float, before: float, fmt: str = "{:+g}") -> str:
+    """Coloured ``(Δ)`` suffix, or empty string when nothing changed."""
+    d = after - before
+    if abs(d) < 1e-9:
+        return ""
+    color = constants.COLOR_INCREASE if d > 0 else constants.COLOR_DECREASE
+    return " " + _span(f"({fmt.format(d)})", color)
+
+
+def _val(after: float, before: float) -> str:
+    return f"{after:g}{_delta(after, before)}"
+
+
+def _state_cell(after: str, before: str) -> str:
+    if after == before:
+        return after
+    color = constants.COLOR_INCREASE if after == "active" else constants.COLOR_DECREASE
+    return _span(f"{after} (was {before})", color)
+
+
+def _effect_token(label: str, value: float) -> str:
+    color = constants.COLOR_INCREASE if value > 0 else constants.COLOR_DECREASE
+    return _span(f"{label} {value:+g}", color)
+
+
+def snapshot(constituencies: list[Constituency]) -> dict:
+    """Capture per-constituency state for diffing against the post-round state."""
+    return {
+        c.name: {
+            "grievance": c.grievance,
+            "risk": c.risk,
+            "threshold": c.threshold,
+            "net_pressure": c.net_pressure,
+            "falsification_gap": c.falsification_gap,
+            "state": c.state.value,
+            "true_support": dict(c.true_support),
+        }
+        for c in constituencies
+    }
+
+
+_LEGEND = (
+    "Changes this session are coloured: "
+    f"{_span('increase', constants.COLOR_INCREASE)} / "
+    f"{_span('decrease', constants.COLOR_DECREASE)}."
+)
+
+_SUPPORT_ORDER = ["RPA", "OldGuard", "Moderns", "OUP", "PPA", "Church"]
+
+
+def _all_factions(constituencies: list[Constituency]) -> list[str]:
+    """Union of factions across all constituencies, in a stable column order."""
+    present: set[str] = set()
+    for c in constituencies:
+        present |= set(c.true_support)
+    extra = sorted(f for f in present if f not in _SUPPORT_ORDER)
+    return [f for f in _SUPPORT_ORDER if f in present] + extra
+
+
+def _true_support_table(constituencies, before, factions) -> list[str]:
+    head = "| Constituency | " + " | ".join(factions) + " | Gap |"
+    rows = [head, "|" + "---|" * (len(factions) + 2)]
+    for c in constituencies:
+        b = before[c.name]
+        cells = []
+        for f in factions:
+            if f in c.true_support:
+                now, was = round(c.true_support[f]), round(b["true_support"].get(f, 0.0))
+                cells.append(f"{now}%{_delta(now, was)}")
+            else:
+                cells.append("—")
+        gap = _val(c.falsification_gap, b["falsification_gap"])
+        rows.append(f"| {c.name} | " + " | ".join(cells) + f" | {gap} |")
+    return rows
+
+
+def _expressed_support_table(constituencies, factions) -> list[str]:
+    head = "| Constituency | " + " | ".join(factions) + " |"
+    rows = [head, "|" + "---|" * (len(factions) + 1)]
+    for c in constituencies:
+        exp = expressed_support(c)
+        cells = [f"{round(exp[f])}%" if f in exp else "—" for f in factions]
+        rows.append(f"| {c.name} | " + " | ".join(cells) + " |")
+    return rows
+
+
+def gm_round_report(round_number, resolutions, constituencies, before, contagion=None) -> str:
+    """Full GM report: resolutions, state, disruption, and support tables.
+
+    ``before`` is a :func:`snapshot` taken at the start of the round; every
+    table shows the post-round value with a coloured change against it.
+    """
+    lines = [f"# GM Round Report — Session {round_number}", "", _LEGEND, ""]
+
+    # ── programme resolutions ────────────────────────────────────────────
+    lines.append("## Programme resolutions")
     for r in resolutions:
         p = r.graded.programme
         lines.append(
@@ -51,25 +150,69 @@ def gm_round_report(round_number, resolutions, constituencies, contagion=None) -
         d = r.deltas
         eff = []
         if d.grievance:
-            eff.append(f"G {d.grievance:+g}")
+            eff.append(_effect_token("G", d.grievance))
         if d.risk:
-            eff.append(f"R {d.risk:+g}")
+            eff.append(_effect_token("R", d.risk))
         if d.support_shift:
-            eff.append(f"support {d.support_shift:+g}")
+            eff.append(_effect_token("support", d.support_shift))
         if d.martyr:
-            eff.append("MARTYR")
+            eff.append("**MARTYR**")
         if d.contagion_seed:
-            eff.append("contagion seed")
+            eff.append("**contagion seed**")
         lines.append(f"  - effect: {', '.join(eff) or 'none'}")
-    lines += ["", "## Constituency state", "", "| Constituency | G | R | P=G-R | T | State |", "|---|---|---|---|---|---|"]
+    if not resolutions:
+        lines.append("- (no programmes resolved this session)")
+
+    # ── constituency state ───────────────────────────────────────────────
+    lines += [
+        "",
+        "## Constituency state",
+        "",
+        "| Constituency | G | R | P=G-R | T | Gap | State |",
+        "|---|---|---|---|---|---|---|",
+    ]
     for c in constituencies:
+        b = before[c.name]
         lines.append(
-            f"| {c.name} | {c.grievance:g} | {c.risk:g} | {c.net_pressure:g} | "
-            f"{c.threshold:g} | {c.state.value} |"
+            f"| {c.name} "
+            f"| {_val(c.grievance, b['grievance'])} "
+            f"| {_val(c.risk, b['risk'])} "
+            f"| {_val(c.net_pressure, b['net_pressure'])} "
+            f"| {_val(c.threshold, b['threshold'])} "
+            f"| {_val(c.falsification_gap, b['falsification_gap'])} "
+            f"| {_state_cell(c.state.value, b['state'])} |"
         )
+
+    # ── disruption index ─────────────────────────────────────────────────
     idx = sum(c.size_weight for c in constituencies if c.state is ConstituencyState.ACTIVE)
+    before_idx = sum(
+        c.size_weight for c in constituencies if before[c.name]["state"] == "active"
+    )
     band = constants.disruption_band(idx)
-    lines += ["", f"**Disruption Index: {idx} — {band['label']}** ({band['effect']})"]
+    lines += [
+        "",
+        f"**Disruption Index: {idx}{_delta(idx, before_idx)} — {band['label']}** "
+        f"({band['effect']})",
+    ]
+
+    # ── support: two wide matrices, true (GM-only) then expressed ────────
+    factions = _all_factions(constituencies)
+    lines += [
+        "",
+        "## Constituency support",
+        "",
+        "Two views of the same allegiances. **True** is the GM-only reality "
+        "(changes coloured vs round start); **Expressed** is what each "
+        "constituency dares to say in public after preference falsification. "
+        "Both are allegiance shares and are distinct from a faction's "
+        "*affinity/resonance* — see the docs.",
+        "",
+        "### True support (GM-only)",
+        "",
+    ]
+    lines += _true_support_table(constituencies, before, factions)
+    lines += ["", "### Expressed support (public / falsified)", ""]
+    lines += _expressed_support_table(constituencies, factions)
     return "\n".join(lines) + "\n"
 
 

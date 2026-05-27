@@ -63,6 +63,15 @@ MARTYR_THRESHOLD_DROP: float = 1.0
 COERCIVE_FACTION: str = "OldGuard"
 ILLEGAL_FACTION: str = "RPA"
 
+# ── report change-colouring (Wong 2011, colourblind-safe) ────────────────
+# Default: blue increase / vermilion decrease — the most robust diverging pair,
+# legible under deutan, protan AND tritan deficiency. For a "growth/decline"
+# feel, swap to teal/orange (strong for deutan/protan, weaker for rare tritan):
+#     COLOR_INCREASE = "#009E73"  # Wong bluish-green (teal)
+#     COLOR_DECREASE = "#E69F00"  # Wong orange
+COLOR_INCREASE: str = "#0072B2"  # Wong blue
+COLOR_DECREASE: str = "#D55E00"  # Wong vermilion
+
 
 def _read_csv(path: Path) -> list[dict[str, str]]:
     with open(path, newline="", encoding="utf-8") as fh:
