@@ -1,0 +1,5 @@
+tier,q_min,q_max,q_mod,guidance
+weak,0,2,-2,Vague intent or implausible leverage; no historical grounding
+sound,3,5,0,Clear intent with plausible means
+strong,6,8,2,Well-argued; credible leverage; cites historical precedent
+decisive,9,10,4,Exceptional; precise causal logic and strong precedent

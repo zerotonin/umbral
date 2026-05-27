@@ -1,0 +1,5 @@
+min,max,label,effect
+0,1,Grumbling,baseline
+2,4,Unrest,Old Guard QoL -1 per turn
+5,8,Crisis / economy seizing,incumbent QoL -3; business as usual suspended
+9,12,Revolutionary situation / dual power,regime collapse check

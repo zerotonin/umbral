@@ -1,0 +1,31 @@
+constituency,faction,true_pct,falsification_gap
+Students,RPA,35,5
+Students,Moderns,30,5
+Students,Church,15,5
+Students,OldGuard,10,5
+Students,OUP,5,5
+Students,PPA,5,5
+Urban proletariat,RPA,40,10
+Urban proletariat,Moderns,25,10
+Urban proletariat,Church,15,10
+Urban proletariat,OldGuard,10,10
+Urban proletariat,OUP,5,10
+Urban proletariat,PPA,5,10
+Peasant farmers,RPA,45,15
+Peasant farmers,OldGuard,25,15
+Peasant farmers,Church,20,15
+Peasant farmers,OUP,10,15
+Indigenous (Oniat),OUP,55,8
+Indigenous (Oniat),RPA,20,8
+Indigenous (Oniat),Church,15,8
+Indigenous (Oniat),Moderns,5,8
+Indigenous (Oniat),OldGuard,5,8
+Professional classes,Moderns,55,3
+Professional classes,PPA,15,3
+Professional classes,OldGuard,15,3
+Professional classes,Church,10,3
+Professional classes,RPA,5,3
+Native capitalists,OldGuard,40,0
+Native capitalists,Moderns,25,0
+Native capitalists,PPA,20,0
+Native capitalists,Church,15,0

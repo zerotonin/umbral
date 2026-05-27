@@ -1,0 +1,7 @@
+name,size_weight,grievance,risk,threshold,state,action_mode
+Students,1,5,2,2,active,Protest / vanguard
+Urban proletariat,3,6,4,4,quiescent,General strike
+Peasant farmers,5,7,6,7,quiescent,Mass numbers / land seizure
+Indigenous (Oniat),1,7,5,4,quiescent,Blockade / appeal to UN
+Professional classes,1,3,3,6,quiescent,Withdrawal / exodus
+Native capitalists,1,2,2,8,quiescent,Capital flight
