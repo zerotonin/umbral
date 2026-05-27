@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+title: "Umbral - mass-response engine for The Fate of Abuc"
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - given-names: David
+    family-names: Jenkins
+  - given-names: Joseph
+    family-names: Cahill-Lane
+  - given-names: "Bart R. H."
+    family-names: Geurten
+    orcid: "https://orcid.org/0000-0002-1816-3241"
+version: "0.1.0"
+date-released: "2026-05-28"
+license: MIT
+repository-code: "https://github.com/zerotonin/umbral"

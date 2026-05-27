@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.coverage
+htmlcov/
+docs/_build/
+.venv/
+local_paths.json
+# round outputs
+out/
+round_*/
+*.jsonl
+state.json

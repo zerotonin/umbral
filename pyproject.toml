@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "umbral"
+dynamic = ["version"]
+description = "Mass-response engine for The Fate of Abuc (POLS399 revolution RPG)."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+  {name = "David Jenkins"},
+  {name = "Joseph Cahill-Lane"},
+  {name = "Bart R. H. Geurten"},
+]
+keywords = ["wargaming", "serious-games", "political-science", "simulation", "teaching"]
+classifiers = [
+  "Programming Language :: Python :: 3.11",
+  "License :: OSI Approved :: MIT License",
+  "Intended Audience :: Education",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7", "pytest-cov"]
+docs = ["sphinx>=7", "furo", "myst-parser"]
+
+[project.scripts]
+umbral = "umbral.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/zerotonin/umbral"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools_scm]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
